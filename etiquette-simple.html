@@ -278,7 +278,7 @@
       .label-empty,
       .label-preview {
         width: min(420px, 100%);
-        aspect-ratio: 2 / 1;
+        aspect-ratio: 72 / 38;
       }
 
       .label-preview {
@@ -342,12 +342,12 @@
 
       .actions-grid {
         display: grid;
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr 1fr;
         gap: 8px;
       }
 
       .actions-grid button {
-        height: 52px;
+        height: 50px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -357,10 +357,22 @@
         font-weight: 900;
       }
 
+      .actions-grid .action-request,
+      .actions-grid .action-print-list {
+        height: 68px;
+        font-size: 20px;
+      }
+
       .action-reset {
         border: 1px solid rgba(148, 163, 184, 0.4);
         color: var(--text-muted);
         background: rgba(15, 23, 42, 0.9);
+      }
+
+      #clearQueueButton {
+        border: 1px solid rgba(239, 68, 68, 0.58);
+        color: white;
+        background: rgba(239, 68, 68, 0.16);
       }
 
       .action-request {
@@ -929,7 +941,7 @@
               <title>Impression étiquettes</title>
               <style>
                 @page {
-                  size: 340mm 260mm;
+                  size: 308mm 248mm;
                   margin: 0;
                 }
                 * { box-sizing: border-box; }
@@ -941,12 +953,12 @@
                   font-family: Arial, Helvetica, sans-serif;
                 }
                 .print-sheet {
-                  width: 340mm;
-                  height: 260mm;
+                  width: 308mm;
+                  height: 248mm;
                   padding: 10mm;
                   display: grid;
-                  grid-template-columns: repeat(4, 80mm);
-                  grid-template-rows: repeat(6, 40mm);
+                  grid-template-columns: repeat(4, 72mm);
+                  grid-template-rows: repeat(6, 38mm);
                   page-break-after: always;
                   break-after: page;
                   background: white;
@@ -956,8 +968,8 @@
                   break-after: auto;
                 }
                 .print-label {
-                  width: 80mm;
-                  height: 40mm;
+                  width: 72mm;
+                  height: 38mm;
                   position: relative;
                   overflow: hidden;
                   background: white;
@@ -972,7 +984,7 @@
                 .print-small-index {
                   left: 4%;
                   top: 36%;
-                  font-size: 2.8mm;
+                  font-size: 2.66mm;
                   font-weight: 400;
                   line-height: 1;
                   transform: translateY(-50%);
@@ -980,7 +992,7 @@
                 .print-zone {
                   left: 12%;
                   top: 28%;
-                  font-size: 10mm;
+                  font-size: 9.5mm;
                   font-weight: 400;
                   line-height: 1;
                   white-space: nowrap;
@@ -999,7 +1011,7 @@
                 .print-location {
                   left: 67%;
                   top: 83%;
-                  font-size: 21.6mm;
+                  font-size: 20.52mm;
                   font-weight: 700;
                   line-height: 1;
                   white-space: nowrap;

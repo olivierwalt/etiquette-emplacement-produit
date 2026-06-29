@@ -23,7 +23,7 @@ L'utilisateur sélectionne :
 3. Échelle
 4. Emplacement via clavier numérique
 
-Puis l'application affiche une étiquette blanche au ratio `80mm x 40mm`, génère un code-barres Code 128 et propose :
+Puis l'application affiche une étiquette blanche au ratio `72mm x 38mm`, génère un code-barres Code 128 et propose :
 
 - `Réinitialiser`
 - `Ajouter à l'impression`
@@ -31,7 +31,7 @@ Puis l'application affiche une étiquette blanche au ratio `80mm x 40mm`, génè
 - `Vider la liste`
 - `Historique`
 
-La version actuelle est pensée pour fonctionner comme une simple page web sur un PC sans autorisations particulières. Elle ne dépend d'aucun endpoint backend. Les étiquettes ajoutées à l'impression sont stockées dans une file locale du navigateur via `localStorage`, puis imprimées ensemble au format `80mm x 40mm`.
+La version actuelle est pensée pour fonctionner comme une simple page web sur un PC sans autorisations particulières. Elle ne dépend d'aucun endpoint backend. Les étiquettes ajoutées à l'impression sont stockées dans une file locale du navigateur via `localStorage`, puis imprimées ensemble au format `72mm x 38mm`.
 
 Une version autonome hors ligne est disponible avec :
 
@@ -84,7 +84,7 @@ Disposition actuelle :
 
 ```json
 {
-  "label": { "width": "80mm", "height": "40mm" },
+  "label": { "width": "72mm", "height": "38mm" },
   "smallIndex": { "x": "4%", "y": "36%", "fontWeight": "400", "fontSize": "7%" },
   "zone": { "x": "12%", "y": "28%", "fontWeight": "400", "fontSize": "25%" },
   "barcode": { "type": "CODE128", "x": "46%", "y": "8%", "width": "43%", "height": "20%" },
@@ -181,28 +181,28 @@ Flux d'utilisation :
 5. Retirer une étiquette ajoutée par erreur avec la croix `×`, si besoin.
 6. Cliquer sur `Imprimer la liste`.
 
-L'impression ouvre la boîte d'impression du navigateur avec une planche de 24 emplacements maximum : 4 colonnes de `80mm` et 6 lignes de `40mm`. Une marge de `10mm` est ajoutée autour de la planche et chaque étiquette a un contour gris clair de `1pt` pour faciliter le découpage.
+L'impression ouvre la boîte d'impression du navigateur avec une planche de 24 emplacements maximum : 4 colonnes de `72mm` et 6 lignes de `38mm`. Une marge de `10mm` est ajoutée autour de la planche et chaque étiquette a un contour gris clair de `1pt` pour faciliter le découpage.
 
 Le CSS d'impression demande donc une feuille personnalisée :
 
 ```css
 @page {
-  size: 340mm 260mm;
+  size: 308mm 248mm;
   margin: 0;
 }
 
 .print-sheet {
-  width: 340mm;
-  height: 260mm;
+  width: 308mm;
+  height: 248mm;
   padding: 10mm;
 }
 ```
 
-Important : 4 colonnes de `80mm` font `320mm`, et avec les marges la feuille totale mesure `340mm x 260mm`. Cette planche ne tient donc pas sur un A4 à taille réelle. Si la boîte d'impression reste en A4, il faudra choisir `adapter à la page`, ce qui réduira les étiquettes. Pour garder des étiquettes réellement `80mm x 40mm`, il faut un format papier personnalisé `340mm x 260mm` ou une imprimante/support adapté.
+Important : 4 colonnes de `72mm` font `288mm`, et avec les marges la feuille totale mesure `308mm x 248mm`. Cette planche ne tient donc pas sur un A4 à taille réelle. Si la boîte d'impression reste en A4, il faudra choisir `adapter à la page`, ce qui réduira les étiquettes. Pour garder des étiquettes réellement `72mm x 38mm`, il faut un format papier personnalisé `308mm x 248mm` ou une imprimante/support adapté.
 
 Selon le navigateur, le pilote et l'imprimante, il peut être nécessaire de confirmer manuellement :
 
-- format papier : `340mm x 260mm`
+- format papier : `308mm x 248mm`
 - marges : aucune marge supplémentaire côté pilote
 - échelle : 100 %
 
