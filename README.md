@@ -180,18 +180,22 @@ Flux d'utilisation :
 4. Répéter pour toutes les étiquettes voulues.
 5. Cliquer sur `Imprimer la liste`.
 
-L'impression ouvre la boîte d'impression du navigateur avec une page par étiquette. Le CSS d'impression demande :
+L'impression ouvre la boîte d'impression du navigateur avec une planche de 24 emplacements maximum : 4 colonnes de `80mm` et 6 lignes de `40mm`.
+
+Le CSS d'impression demande donc une feuille personnalisée :
 
 ```css
 @page {
-  size: 80mm 40mm;
+  size: 320mm 240mm;
   margin: 0;
 }
 ```
 
-Selon le navigateur, le pilote et l'imprimante, il peut être nécessaire de confirmer manuellement dans la boîte d'impression :
+Important : 4 colonnes de `80mm` font `320mm`, donc cette planche ne tient pas sur un A4 à taille réelle. Si la boîte d'impression reste en A4, il faudra choisir `adapter à la page`, ce qui réduira les étiquettes. Pour garder des étiquettes réellement `80mm x 40mm`, il faut un format papier personnalisé `320mm x 240mm` ou une imprimante/support adapté.
 
-- format papier : `80mm x 40mm`
+Selon le navigateur, le pilote et l'imprimante, il peut être nécessaire de confirmer manuellement :
+
+- format papier : `320mm x 240mm`
 - marges : aucune ou minimum
 - échelle : 100 %
 

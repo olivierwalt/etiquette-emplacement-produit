@@ -861,7 +861,7 @@
               <title>Impression étiquettes</title>
               <style>
                 @page {
-                  size: 80mm 40mm;
+                  size: 320mm 240mm;
                   margin: 0;
                 }
                 * { box-sizing: border-box; }
@@ -872,18 +872,26 @@
                   color: black;
                   font-family: Arial, Helvetica, sans-serif;
                 }
+                .print-sheet {
+                  width: 320mm;
+                  height: 240mm;
+                  display: grid;
+                  grid-template-columns: repeat(4, 80mm);
+                  grid-template-rows: repeat(6, 40mm);
+                  page-break-after: always;
+                  break-after: page;
+                  background: white;
+                }
+                .print-sheet:last-child {
+                  page-break-after: auto;
+                  break-after: auto;
+                }
                 .print-label {
                   width: 80mm;
                   height: 40mm;
                   position: relative;
                   overflow: hidden;
-                  page-break-after: always;
-                  break-after: page;
                   background: white;
-                }
-                .print-label:last-child {
-                  page-break-after: auto;
-                  break-after: auto;
                 }
                 .print-small-index,
                 .print-zone,
@@ -929,7 +937,10 @@
                 }
               </style>
             </head>
-            <body>${entries.map(printableLabelMarkup).join("")}</body>
+            <body>${Array.from({ length: Math.ceil(entries.length / 24) }, (_, sheetIndex) => {
+              const sheetEntries = entries.slice(sheetIndex * 24, sheetIndex * 24 + 24);
+              return `<main class="print-sheet">${sheetEntries.map(printableLabelMarkup).join("")}</main>`;
+            }).join("")}</body>
           </html>
         `);
         printWindow.document.close();
@@ -944,14 +955,18 @@
       update();
       renderPrintQueue();
 
-      $("resetButton").addEventListener("click", () => {
+      function resetForm(message = "Formulaire réinitialisé.") {
         state.zone = null;
         state.allee = null;
         state.echelle = null;
         state.emplacement = "";
         document.querySelectorAll(".choice-button.active").forEach((button) => button.classList.remove("active"));
         update();
-        $("statusLine").textContent = "Formulaire réinitialisé.";
+        $("statusLine").textContent = message;
+      }
+
+      $("resetButton").addEventListener("click", () => {
+        resetForm();
       });
 
       $("addPrintButton").addEventListener("click", () => {
@@ -960,7 +975,7 @@
         savePrintQueue([...printQueue(), entry]);
         saveHistory([entry, ...history()]);
         renderPrintQueue();
-        $("statusLine").textContent = `Étiquette ${entry.barcodeValue} ajoutée à la liste d’impression.`;
+        resetForm(`Étiquette ${entry.barcodeValue} ajoutée à la liste d’impression.`);
       });
 
       $("printQueueButton").addEventListener("click", printQueuedLabels);
