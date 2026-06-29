@@ -31,13 +31,14 @@ Puis l'application affiche une étiquette blanche au ratio `80mm x 40mm`, génè
 
 La version actuelle est pensée pour fonctionner comme une simple page web sur un PC sans autorisations particulières. Elle ne tente pas d'imprimer directement et ne dépend d'aucun endpoint backend. Les demandes d'impression sont enregistrées dans l'historique local du navigateur via `localStorage`.
 
-Une version autonome est disponible dans :
+Une version autonome hors ligne est disponible avec :
 
 ```text
 etiquette-simple.html
+vendor/JsBarcode.all.min.js
 ```
 
-Ce fichier peut être copié sur un PC et ouvert directement dans un navigateur. Il ne demande pas d'installation Node, pas de serveur local et pas de droits administrateur. Il charge seulement JsBarcode depuis un CDN public.
+Ces deux éléments peuvent être copiés sur un PC et ouverts directement dans un navigateur. Il ne faut pas d'installation Node, pas de serveur local, pas d'accès Internet et pas de droits administrateur. Le dossier `vendor/` doit rester à côté du fichier HTML.
 
 ## Encodage Code 128
 
@@ -164,17 +165,10 @@ Copier ce fichier sur le PC :
 
 ```text
 etiquette-simple.html
+vendor/JsBarcode.all.min.js
 ```
 
-Puis l'ouvrir dans Chrome, Edge, Firefox ou un autre navigateur moderne.
-
-Limite : la génération du code-barres dépend du chargement de JsBarcode depuis :
-
-```text
-https://cdn.jsdelivr.net/npm/jsbarcode@3.12.1/dist/JsBarcode.all.min.js
-```
-
-Si le PC n'a pas accès à Internet ou si le CDN est bloqué, il faudra embarquer JsBarcode localement dans le fichier.
+Puis ouvrir `etiquette-simple.html` dans Chrome, Edge, Firefox ou un autre navigateur moderne.
 
 L'app locale sera accessible via l'URL affichée par Vite, généralement :
 
