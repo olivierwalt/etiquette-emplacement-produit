@@ -8,7 +8,7 @@ import HistoryPanel from "./components/HistoryPanel";
 import LabelPreview from "./components/LabelPreview";
 import SectionCard from "./components/SectionCard";
 import ZoneSelector from "./components/ZoneSelector";
-import type { HistoryEntry, PrintDestination, Zone } from "./types";
+import type { HistoryEntry, Zone } from "./types";
 import { buildBarcodeValue } from "./utils/barcode";
 import { formatEchelle, formatEmplacement } from "./utils/format";
 import { loadHistory, saveHistory } from "./utils/history";
@@ -68,50 +68,11 @@ export default function App() {
     saveHistory(nextHistory);
   }
 
-  async function postPayload(url: string, payload: Record<string, unknown>) {
-    try {
-      await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-    } catch {
-      // The local history keeps the tactile prototype useful before backend wiring.
-    }
-  }
-
-  async function printLabel(destination: PrintDestination) {
+  function requestPrint() {
     if (!zone || !allee || !echelle || !formattedEmplacement || !barcodeValue) return;
 
-    const payload = {
-      destination,
-      zone,
-      allee,
-      echelle: formatEchelle(echelle),
-      emplacement: formattedEmplacement,
-      barcodeValue,
-    };
-
-    addHistoryEntry(destination === "PL1" ? "Impression PL1" : "Impression PL2");
-    setStatus(`Étiquette ${barcodeValue} envoyée vers ${destination}.`);
-    await postPayload("/api/print-label", payload);
-  }
-
-  async function requestReplacement() {
-    if (!zone || !allee || !echelle || !formattedEmplacement || !barcodeValue) return;
-
-    const payload = {
-      zone,
-      allee,
-      echelle: formatEchelle(echelle),
-      emplacement: formattedEmplacement,
-      barcodeValue,
-      createdAt: new Date().toISOString(),
-    };
-
-    addHistoryEntry("Demande de remplacement");
-    setStatus(`Demande de remplacement créée pour ${barcodeValue}.`);
-    await postPayload("/api/replacement-request", payload);
+    addHistoryEntry("Demande d’impression");
+    setStatus(`Demande d’impression enregistrée pour ${barcodeValue}.`);
   }
 
   function clearHistory() {
@@ -183,9 +144,8 @@ export default function App() {
 
           <ActionButtons
             disabled={!isComplete}
-            onPrint={printLabel}
             onReset={handleReset}
-            onReplacement={requestReplacement}
+            onPrintRequest={requestPrint}
           />
         </div>
       </div>

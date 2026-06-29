@@ -391,18 +391,8 @@ button:disabled {
   border-radius: 8px;
 }
 
-.action-print {
-  height: 48px;
-  border: 1px solid var(--cyan);
-  color: white;
-  background: linear-gradient(135deg, #006bff, #0047ff);
-  box-shadow: 0 0 18px rgba(0, 212, 255, 0.45);
-  font-size: 18px;
-  font-weight: 900;
-}
-
 .action-reset {
-  height: 44px;
+  height: 52px;
   border: 1px solid rgba(148, 163, 184, 0.4);
   color: var(--text-muted);
   background: rgba(15, 23, 42, 0.9);
@@ -410,8 +400,8 @@ button:disabled {
   font-weight: 800;
 }
 
-.action-replace {
-  height: 44px;
+.action-request {
+  height: 52px;
   border: 1px solid #a855f7;
   color: white;
   background: linear-gradient(135deg, #5b21b6, #8b2cff);

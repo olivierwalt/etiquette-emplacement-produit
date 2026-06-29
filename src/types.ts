@@ -9,11 +9,9 @@ export type Zone =
   | "Homogène"
   | "Parapharmacie";
 
-export type PrintDestination = "PL1" | "PL2";
-
 export type HistoryEntry = {
   id: string;
-  action: "Impression PL1" | "Impression PL2" | "Demande de remplacement";
+  action: "Demande d’impression";
   zone: Zone;
   allee: string;
   echelle: string;

@@ -1,0 +1,716 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Étiquette emplacement produit</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.12.1/dist/JsBarcode.all.min.js"></script>
+    <style>
+      :root {
+        --bg-main: #030712;
+        --bg-card: #071426;
+        --border-soft: rgba(56, 189, 248, 0.35);
+        --blue: #006bff;
+        --cyan: #00d4ff;
+        --purple: #8b2cff;
+        --text-main: #fff;
+        --text-muted: #b8c7da;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-width: 320px;
+        min-height: 100vh;
+        color: var(--text-main);
+        background:
+          linear-gradient(180deg, rgba(0, 107, 255, 0.09), transparent 320px),
+          radial-gradient(circle at top right, rgba(139, 44, 255, 0.16), transparent 360px),
+          var(--bg-main);
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      button {
+        border: 0;
+        font: inherit;
+        cursor: pointer;
+      }
+
+      button:disabled {
+        cursor: not-allowed;
+        filter: grayscale(0.35);
+        opacity: 0.48;
+      }
+
+      .app-shell {
+        width: min(1380px, calc(100% - 28px));
+        margin: 0 auto;
+        padding: 12px 0 16px;
+      }
+
+      .app-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        padding: 8px 0 12px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+
+      .barcode-logo {
+        width: 48px;
+        height: 48px;
+        display: grid;
+        grid-template-columns: 5px 9px 4px 13px 7px;
+        gap: 4px;
+        padding: 10px;
+        border: 1px solid rgba(0, 212, 255, 0.55);
+        border-radius: 8px;
+        background: linear-gradient(135deg, rgba(0, 107, 255, 0.2), rgba(139, 44, 255, 0.16));
+        box-shadow: 0 0 22px rgba(0, 212, 255, 0.22);
+      }
+
+      .barcode-logo span {
+        display: block;
+        background: var(--cyan);
+        border-radius: 2px;
+        box-shadow: 0 0 10px rgba(0, 212, 255, 0.8);
+      }
+
+      h1,
+      h2 {
+        margin: 0;
+        letter-spacing: 0;
+      }
+
+      h1 {
+        font-size: clamp(22px, 2.4vw, 32px);
+        line-height: 1.02;
+        font-weight: 900;
+      }
+
+      .brand p {
+        margin: 3px 0 0;
+        color: var(--text-muted);
+        font-size: 14px;
+      }
+
+      .history-button {
+        min-height: 46px;
+        padding: 0 18px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid rgba(0, 212, 255, 0.44);
+        border-radius: 8px;
+        color: var(--text-main);
+        background: rgba(7, 20, 38, 0.92);
+        font-weight: 800;
+      }
+
+      .section-card {
+        padding: 14px;
+        margin-bottom: 10px;
+        border: 1px solid rgba(56, 189, 248, 0.28);
+        border-radius: 8px;
+        background: linear-gradient(135deg, rgba(7, 20, 38, 0.95), rgba(3, 7, 18, 0.95));
+        box-shadow: 0 0 24px rgba(0, 212, 255, 0.08);
+      }
+
+      .section-heading {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+
+      .step-number {
+        width: 34px;
+        height: 34px;
+        border-radius: 999px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 auto;
+        background: linear-gradient(135deg, #006bff, #00d4ff);
+        font-weight: 900;
+      }
+
+      .section-heading h2 {
+        font-size: 20px;
+        font-weight: 900;
+      }
+
+      .choice-grid {
+        display: grid;
+        gap: 8px;
+      }
+
+      .zone-grid {
+        grid-template-columns: repeat(9, minmax(0, 1fr));
+      }
+
+      .allee-grid {
+        grid-template-columns: repeat(26, minmax(0, 1fr));
+      }
+
+      .echelle-grid {
+        grid-template-columns: repeat(15, minmax(0, 1fr));
+      }
+
+      .choice-button,
+      .keypad button {
+        min-height: 44px;
+        color: var(--text-main);
+        border: 1px solid rgba(148, 163, 184, 0.35);
+        border-radius: 8px;
+        background: rgba(15, 23, 42, 0.82);
+        font-weight: 800;
+      }
+
+      .choice-button.active {
+        border-color: var(--cyan);
+        background: linear-gradient(135deg, #006bff, #00d4ff);
+        box-shadow: 0 0 18px rgba(0, 212, 255, 0.55);
+      }
+
+      .zone-button {
+        height: 48px;
+        padding: 0 6px;
+        font-size: 14px;
+      }
+
+      .allee-button,
+      .echelle-button {
+        height: 44px;
+        font-size: 16px;
+      }
+
+      .lower-workspace {
+        display: grid;
+        grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.12fr);
+        gap: 10px;
+        align-items: stretch;
+      }
+
+      .lower-workspace .section-card,
+      .preview-actions .section-card {
+        margin-bottom: 0;
+      }
+
+      .preview-actions {
+        display: grid;
+        grid-template-rows: auto minmax(24px, auto) auto;
+        gap: 8px;
+      }
+
+      .emplacement-layout {
+        display: grid;
+        grid-template-columns: 1fr 176px;
+        align-items: center;
+        gap: 14px;
+      }
+
+      .location-display {
+        height: 132px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--cyan);
+        border-radius: 8px;
+        background:
+          linear-gradient(135deg, rgba(0, 107, 255, 0.2), rgba(139, 44, 255, 0.16)),
+          rgba(7, 20, 38, 0.9);
+        font-size: clamp(56px, 6vw, 84px);
+        font-weight: 900;
+      }
+
+      .keypad {
+        display: grid;
+        grid-template-columns: repeat(3, 52px);
+        gap: 8px;
+        justify-content: center;
+      }
+
+      .keypad button {
+        width: 52px;
+        height: 42px;
+        font-size: 17px;
+      }
+
+      .keypad .clear {
+        width: auto;
+        grid-column: 2 / 4;
+        color: white;
+        background: rgba(239, 68, 68, 0.16);
+        border-color: rgba(239, 68, 68, 0.5);
+      }
+
+      .preview-wrap {
+        display: flex;
+        justify-content: center;
+      }
+
+      .label-empty,
+      .label-preview {
+        width: min(420px, 100%);
+        aspect-ratio: 2 / 1;
+      }
+
+      .label-preview {
+        position: relative;
+        container-type: size;
+        border-radius: 8px;
+        background: white;
+        color: black;
+        box-shadow: 0 12px 35px rgba(0, 0, 0, 0.35);
+      }
+
+      .label-small-index,
+      .label-zone,
+      .label-location,
+      .label-barcode {
+        position: absolute;
+      }
+
+      .label-small-index {
+        left: 4%;
+        top: 36%;
+        font-size: 7cqh;
+        font-weight: 400;
+        line-height: 1;
+        transform: translateY(-50%);
+      }
+
+      .label-zone {
+        left: 12%;
+        top: 28%;
+        font-size: 25cqh;
+        font-weight: 400;
+        line-height: 1;
+        transform: translateY(-50%);
+        white-space: nowrap;
+      }
+
+      .label-barcode {
+        left: 46%;
+        top: 8%;
+        width: 43%;
+        height: 20%;
+      }
+
+      .label-location {
+        left: 67%;
+        top: 83%;
+        font-size: 54cqh;
+        font-weight: 700;
+        line-height: 1;
+        transform: translate(-50%, -100%);
+        white-space: nowrap;
+      }
+
+      .status-line {
+        min-height: 28px;
+        color: var(--text-muted);
+        text-align: center;
+        font-weight: 700;
+      }
+
+      .actions-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+
+      .actions-grid button {
+        height: 52px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        border-radius: 8px;
+        font-size: 18px;
+        font-weight: 900;
+      }
+
+      .action-reset {
+        border: 1px solid rgba(148, 163, 184, 0.4);
+        color: var(--text-muted);
+        background: rgba(15, 23, 42, 0.9);
+      }
+
+      .action-request {
+        border: 1px solid #a855f7;
+        color: white;
+        background: linear-gradient(135deg, #5b21b6, #8b2cff);
+        box-shadow: 0 0 18px rgba(139, 44, 255, 0.45);
+      }
+
+      .history-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 10;
+        display: none;
+        justify-content: flex-end;
+        background: rgba(3, 7, 18, 0.72);
+        backdrop-filter: blur(8px);
+      }
+
+      .history-overlay.open {
+        display: flex;
+      }
+
+      .history-panel {
+        width: min(440px, 100%);
+        height: 100%;
+        padding: 22px;
+        border-left: 1px solid rgba(0, 212, 255, 0.28);
+        background: linear-gradient(180deg, rgba(7, 20, 38, 0.98), rgba(3, 7, 18, 0.98));
+      }
+
+      .history-panel-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 22px;
+      }
+
+      .icon-button {
+        width: 52px;
+        height: 52px;
+        border: 1px solid rgba(0, 212, 255, 0.44);
+        border-radius: 8px;
+        color: var(--text-main);
+        background: rgba(7, 20, 38, 0.92);
+      }
+
+      .history-list {
+        display: grid;
+        gap: 10px;
+      }
+
+      .history-item {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 14px;
+        border: 1px solid rgba(56, 189, 248, 0.2);
+        border-radius: 8px;
+        background: rgba(15, 23, 42, 0.72);
+      }
+
+      .history-item div {
+        display: grid;
+        gap: 4px;
+      }
+
+      .history-item span,
+      .history-item time {
+        color: var(--text-muted);
+        font-size: 13px;
+      }
+
+      .clear-history-button {
+        width: 100%;
+        height: 52px;
+        margin-top: 16px;
+        border: 1px solid rgba(239, 68, 68, 0.5);
+        border-radius: 8px;
+        color: white;
+        background: rgba(239, 68, 68, 0.12);
+        font-weight: 800;
+      }
+
+      @media (max-width: 920px) {
+        .app-header {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        .zone-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .allee-grid {
+          grid-template-columns: repeat(6, minmax(0, 1fr));
+        }
+
+        .echelle-grid {
+          grid-template-columns: repeat(5, minmax(0, 1fr));
+        }
+
+        .lower-workspace,
+        .emplacement-layout,
+        .actions-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="app-header">
+        <div class="brand">
+          <div class="barcode-logo" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+          <div>
+            <h1>ÉTIQUETTE EMPLACEMENT PRODUIT</h1>
+            <p>Générez vos étiquettes d’emplacement en quelques secondes</p>
+          </div>
+        </div>
+        <button class="history-button" id="historyButton">Historique</button>
+      </header>
+
+      <section class="section-card">
+        <div class="section-heading"><span class="step-number">1</span><h2>Zone</h2></div>
+        <div class="choice-grid zone-grid" id="zoneGrid"></div>
+      </section>
+
+      <section class="section-card">
+        <div class="section-heading"><span class="step-number">2</span><h2>Allée</h2></div>
+        <div class="choice-grid allee-grid" id="alleeGrid"></div>
+      </section>
+
+      <section class="section-card">
+        <div class="section-heading"><span class="step-number">3</span><h2>Échelle</h2></div>
+        <div class="choice-grid echelle-grid" id="echelleGrid"></div>
+      </section>
+
+      <div class="lower-workspace">
+        <section class="section-card">
+          <div class="section-heading"><span class="step-number">4</span><h2>Emplacement</h2></div>
+          <div class="emplacement-layout">
+            <div class="location-display" id="locationDisplay">000</div>
+            <div class="keypad" id="keypad"></div>
+          </div>
+        </section>
+
+        <div class="preview-actions">
+          <section class="section-card">
+            <div class="section-heading"><span class="step-number">5</span><h2>Aperçu de l’étiquette</h2></div>
+            <div class="preview-wrap" id="previewWrap"><div class="label-empty"></div></div>
+          </section>
+          <div class="status-line" id="statusLine">Sélectionnez les 4 champs pour activer les actions.</div>
+          <div class="actions-grid">
+            <button class="action-reset" id="resetButton">Réinitialiser</button>
+            <button class="action-request" id="requestButton" disabled>Demande d’impression</button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <div class="history-overlay" id="historyOverlay">
+      <div class="history-panel">
+        <div class="history-panel-header">
+          <div>
+            <h2>Historique</h2>
+            <p id="historyCount">0 action enregistrée</p>
+          </div>
+          <button class="icon-button" id="closeHistory">×</button>
+        </div>
+        <div class="history-list" id="historyList"></div>
+        <button class="clear-history-button" id="clearHistory">Vider l’historique</button>
+      </div>
+    </div>
+
+    <script>
+      const zones = [
+        "Zone 1 - St Joseph",
+        "Zone 2 - St Joseph",
+        "Mezzanine",
+        "Ambiant Magasin",
+        "Frais",
+        "Surgelés",
+        "Fruits Légumes",
+        "Homogène",
+        "Parapharmacie",
+      ];
+      const zoneCodes = {
+        "Zone 1 - St Joseph": "1",
+        "Zone 2 - St Joseph": "2",
+        Mezzanine: "8",
+        "Ambiant Magasin": "3",
+        Frais: "4",
+        Surgelés: "5",
+        "Fruits Légumes": "6",
+        Homogène: "6",
+        Parapharmacie: "7",
+      };
+      const allees = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+      const echelles = Array.from({ length: 15 }, (_, i) => i + 1);
+      const state = { zone: null, allee: null, echelle: null, emplacement: "" };
+      const historyKey = "etiquette-emplacement-produit-history";
+
+      const $ = (id) => document.getElementById(id);
+
+      function formatEchelle(value) {
+        return String(value).padStart(2, "0");
+      }
+
+      function formatEmplacement(value) {
+        const number = Number(value);
+        if (!number || number < 1 || number > 999) return null;
+        return String(number).padStart(3, "0");
+      }
+
+      function barcodeValue() {
+        const emplacement = formatEmplacement(state.emplacement);
+        if (!state.zone || !state.allee || !state.echelle || !emplacement) return "";
+        return `902${zoneCodes[state.zone]}${state.allee}${formatEchelle(state.echelle)}${emplacement}`;
+      }
+
+      function history() {
+        try {
+          return JSON.parse(localStorage.getItem(historyKey) || "[]");
+        } catch {
+          return [];
+        }
+      }
+
+      function saveHistory(entries) {
+        localStorage.setItem(historyKey, JSON.stringify(entries.slice(0, 30)));
+      }
+
+      function setActive(container, value) {
+        [...container.querySelectorAll("button")].forEach((button) => {
+          button.classList.toggle("active", button.dataset.value === String(value));
+        });
+      }
+
+      function update() {
+        const formatted = formatEmplacement(state.emplacement);
+        const code = barcodeValue();
+        const complete = Boolean(code);
+        $("locationDisplay").textContent = formatted || "000";
+        $("requestButton").disabled = !complete;
+        $("statusLine").textContent = complete ? `Étiquette prête : ${code}.` : "Sélectionnez les 4 champs pour activer les actions.";
+
+        if (!complete) {
+          $("previewWrap").innerHTML = '<div class="label-empty"></div>';
+          return;
+        }
+
+        $("previewWrap").innerHTML = `
+          <div class="label-preview" aria-label="Aperçu de l’étiquette">
+            <div class="label-small-index">${zoneCodes[state.zone]}</div>
+            <div class="label-zone">${state.allee}${formatEchelle(state.echelle)}</div>
+            <svg class="label-barcode" id="barcodeSvg"></svg>
+            <div class="label-location">${formatted}</div>
+          </div>
+        `;
+        JsBarcode("#barcodeSvg", code, {
+          format: "CODE128",
+          displayValue: false,
+          margin: 0,
+          width: 1.4,
+          height: 42,
+        });
+      }
+
+      function renderChoiceButtons(items, containerId, className, handler) {
+        const container = $(containerId);
+        container.innerHTML = "";
+        items.forEach((item) => {
+          const button = document.createElement("button");
+          button.className = `choice-button ${className}`;
+          button.dataset.value = String(item);
+          button.textContent = item;
+          button.addEventListener("click", () => {
+            handler(item);
+            setActive(container, item);
+            update();
+          });
+          container.appendChild(button);
+        });
+      }
+
+      function renderKeypad() {
+        const keys = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"];
+        const keypad = $("keypad");
+        keypad.innerHTML = "";
+        keys.forEach((key) => {
+          const button = document.createElement("button");
+          button.textContent = key;
+          button.addEventListener("click", () => {
+            if (state.emplacement.length < 3) state.emplacement = `${state.emplacement}${key}`.slice(0, 3);
+            update();
+          });
+          keypad.appendChild(button);
+        });
+        const clear = document.createElement("button");
+        clear.className = "clear";
+        clear.textContent = "Effacer";
+        clear.addEventListener("click", () => {
+          state.emplacement = "";
+          update();
+        });
+        keypad.appendChild(clear);
+      }
+
+      function renderHistory() {
+        const entries = history();
+        $("historyCount").textContent = `${entries.length} action${entries.length > 1 ? "s" : ""} enregistrée${entries.length > 1 ? "s" : ""}`;
+        $("historyList").innerHTML = entries.length
+          ? entries.map((entry) => `
+            <article class="history-item">
+              <div><strong>${entry.action}</strong><span>${entry.barcodeValue}</span></div>
+              <time>${new Date(entry.createdAt).toLocaleString("fr-FR")}</time>
+            </article>
+          `).join("")
+          : "<p>Aucune demande pour le moment.</p>";
+      }
+
+      renderChoiceButtons(zones, "zoneGrid", "zone-button", (zone) => (state.zone = zone));
+      renderChoiceButtons(allees, "alleeGrid", "allee-button", (allee) => (state.allee = allee));
+      renderChoiceButtons(echelles, "echelleGrid", "echelle-button", (echelle) => (state.echelle = echelle));
+      renderKeypad();
+      update();
+
+      $("resetButton").addEventListener("click", () => {
+        state.zone = null;
+        state.allee = null;
+        state.echelle = null;
+        state.emplacement = "";
+        document.querySelectorAll(".choice-button.active").forEach((button) => button.classList.remove("active"));
+        update();
+        $("statusLine").textContent = "Formulaire réinitialisé.";
+      });
+
+      $("requestButton").addEventListener("click", () => {
+        const code = barcodeValue();
+        const formatted = formatEmplacement(state.emplacement);
+        if (!code || !formatted) return;
+        const entry = {
+          id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}`,
+          action: "Demande d’impression",
+          zone: state.zone,
+          allee: state.allee,
+          echelle: formatEchelle(state.echelle),
+          emplacement: formatted,
+          barcodeValue: code,
+          createdAt: new Date().toISOString(),
+        };
+        saveHistory([entry, ...history()]);
+        $("statusLine").textContent = `Demande d’impression enregistrée pour ${code}.`;
+      });
+
+      $("historyButton").addEventListener("click", () => {
+        renderHistory();
+        $("historyOverlay").classList.add("open");
+      });
+      $("closeHistory").addEventListener("click", () => $("historyOverlay").classList.remove("open"));
+      $("clearHistory").addEventListener("click", () => {
+        saveHistory([]);
+        renderHistory();
+      });
+    </script>
+  </body>
+</html>

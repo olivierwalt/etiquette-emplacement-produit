@@ -25,18 +25,19 @@ L'utilisateur sélectionne :
 
 Puis l'application affiche une étiquette blanche au ratio `80mm x 40mm`, génère un code-barres Code 128 et propose :
 
-- `Imprimer à PL1`
-- `Imprimer à PL2`
 - `Réinitialiser`
-- `Demande de remplacement de l'étiquette`
+- `Demande d'impression`
 - `Historique`
 
-Les endpoints backend ne sont pas encore implémentés :
+La version actuelle est pensée pour fonctionner comme une simple page web sur un PC sans autorisations particulières. Elle ne tente pas d'imprimer directement et ne dépend d'aucun endpoint backend. Les demandes d'impression sont enregistrées dans l'historique local du navigateur via `localStorage`.
 
-- `/api/print-label`
-- `/api/replacement-request`
+Une version autonome est disponible dans :
 
-L'app reste testable : les erreurs réseau sont absorbées et l'historique est stocké en `localStorage`.
+```text
+etiquette-simple.html
+```
+
+Ce fichier peut être copié sur un PC et ouvert directement dans un navigateur. Il ne demande pas d'installation Node, pas de serveur local et pas de droits administrateur. Il charge seulement JsBarcode depuis un CDN public.
 
 ## Encodage Code 128
 
@@ -156,6 +157,24 @@ cd "Emplacement Produit"
 npm install
 npm run dev
 ```
+
+## Utiliser la page autonome sur un PC
+
+Copier ce fichier sur le PC :
+
+```text
+etiquette-simple.html
+```
+
+Puis l'ouvrir dans Chrome, Edge, Firefox ou un autre navigateur moderne.
+
+Limite : la génération du code-barres dépend du chargement de JsBarcode depuis :
+
+```text
+https://cdn.jsdelivr.net/npm/jsbarcode@3.12.1/dist/JsBarcode.all.min.js
+```
+
+Si le PC n'a pas accès à Internet ou si le CDN est bloqué, il faudra embarquer JsBarcode localement dans le fichier.
 
 L'app locale sera accessible via l'URL affichée par Vite, généralement :
 
@@ -283,10 +302,8 @@ Cette commande doit être lancée sur le Raspberry avec le mot de passe sudo.
 
 ## Points à continuer
 
-- Brancher les endpoints réels d'impression :
-  - `/api/print-label`
-  - `/api/replacement-request`
-- Définir le protocole exact vers PL1/PL2.
+- Définir un vrai circuit de traitement des demandes d'impression si plusieurs postes doivent les consulter.
+- Ajouter un export CSV/JSON de l'historique si les demandes doivent être récupérées hors du navigateur.
 - Tester sur l'iPad/tablette cible en mode plein écran.
 - Ajuster finement le rendu étiquette si une nouvelle photo de référence révèle un écart.
 - Éventuellement remplacer le service utilisateur par un service système si `sudo` est disponible.
