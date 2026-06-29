@@ -194,6 +194,24 @@
         font-size: 16px;
       }
 
+      .app-workspace {
+        display: grid;
+        grid-template-columns: minmax(0, 2fr) minmax(300px, 1fr);
+        gap: 12px;
+        align-items: start;
+      }
+
+      .generator-column {
+        min-width: 0;
+      }
+
+      .print-sidebar {
+        position: sticky;
+        top: 12px;
+        display: grid;
+        gap: 10px;
+      }
+
       .lower-workspace {
         display: grid;
         grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.12fr);
@@ -207,9 +225,7 @@
       }
 
       .preview-actions {
-        display: grid;
-        grid-template-rows: auto minmax(24px, auto) auto;
-        gap: 8px;
+        display: block;
       }
 
       .emplacement-layout {
@@ -326,7 +342,7 @@
 
       .actions-grid {
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 1fr;
         gap: 8px;
       }
 
@@ -364,7 +380,7 @@
       .queue-panel {
         display: grid;
         gap: 8px;
-        padding: 10px;
+        padding: 14px;
         border: 1px solid rgba(56, 189, 248, 0.22);
         border-radius: 8px;
         background: rgba(15, 23, 42, 0.62);
@@ -392,20 +408,56 @@
       .queue-list {
         display: grid;
         gap: 6px;
-        max-height: 96px;
+        max-height: 360px;
         overflow: auto;
       }
 
       .queue-item {
-        display: flex;
-        justify-content: space-between;
-        gap: 10px;
-        padding: 8px 10px;
+        display: grid;
+        grid-template-columns: 1fr 34px;
+        align-items: center;
+        column-gap: 8px;
+        row-gap: 3px;
+        position: relative;
+        min-height: 46px;
+        padding: 8px 8px 8px 10px;
         border: 1px solid rgba(148, 163, 184, 0.22);
         border-radius: 8px;
         background: rgba(3, 7, 18, 0.55);
         color: var(--text-muted);
         font-size: 13px;
+      }
+
+      .queue-item.empty {
+        display: block;
+      }
+
+      .queue-item strong,
+      .queue-item span {
+        min-width: 0;
+      }
+
+      .queue-item strong {
+        color: white;
+      }
+
+      .queue-item span {
+        grid-column: 1 / 2;
+        font-size: 12px;
+      }
+
+      .queue-remove {
+        grid-row: 1 / span 2;
+        grid-column: 2 / 3;
+        width: 34px;
+        height: 34px;
+        border: 1px solid rgba(239, 68, 68, 0.45);
+        border-radius: 8px;
+        color: white;
+        background: rgba(239, 68, 68, 0.16);
+        font-size: 20px;
+        font-weight: 900;
+        line-height: 1;
       }
 
       .history-overlay {
@@ -515,9 +567,14 @@
         }
 
         .lower-workspace,
+        .app-workspace,
         .emplacement-layout,
         .actions-grid {
           grid-template-columns: 1fr;
+        }
+
+        .print-sidebar {
+          position: static;
         }
       }
     </style>
@@ -535,40 +592,50 @@
         <button class="history-button" id="historyButton">Historique</button>
       </header>
 
-      <section class="section-card">
-        <div class="section-heading"><span class="step-number">1</span><h2>Zone</h2></div>
-        <div class="choice-grid zone-grid" id="zoneGrid"></div>
-      </section>
-
-      <section class="section-card">
-        <div class="section-heading"><span class="step-number">2</span><h2>Allée</h2></div>
-        <div class="choice-grid allee-grid" id="alleeGrid"></div>
-      </section>
-
-      <section class="section-card">
-        <div class="section-heading"><span class="step-number">3</span><h2>Échelle</h2></div>
-        <div class="choice-grid echelle-grid" id="echelleGrid"></div>
-      </section>
-
-      <div class="lower-workspace">
-        <section class="section-card">
-          <div class="section-heading"><span class="step-number">4</span><h2>Emplacement</h2></div>
-          <div class="emplacement-layout">
-            <div class="location-display" id="locationDisplay">000</div>
-            <div class="keypad" id="keypad"></div>
-          </div>
-        </section>
-
-        <div class="preview-actions">
+      <div class="app-workspace">
+        <div class="generator-column">
           <section class="section-card">
-            <div class="section-heading"><span class="step-number">5</span><h2>Aperçu de l’étiquette</h2></div>
-            <div class="preview-wrap" id="previewWrap"><div class="label-empty"></div></div>
+            <div class="section-heading"><span class="step-number">1</span><h2>Zone</h2></div>
+            <div class="choice-grid zone-grid" id="zoneGrid"></div>
           </section>
-          <div class="status-line" id="statusLine">Sélectionnez les 4 champs pour activer les actions.</div>
+
+          <section class="section-card">
+            <div class="section-heading"><span class="step-number">2</span><h2>Allée</h2></div>
+            <div class="choice-grid allee-grid" id="alleeGrid"></div>
+          </section>
+
+          <section class="section-card">
+            <div class="section-heading"><span class="step-number">3</span><h2>Échelle</h2></div>
+            <div class="choice-grid echelle-grid" id="echelleGrid"></div>
+          </section>
+
+          <div class="lower-workspace">
+            <section class="section-card">
+              <div class="section-heading"><span class="step-number">4</span><h2>Emplacement</h2></div>
+              <div class="emplacement-layout">
+                <div class="location-display" id="locationDisplay">000</div>
+                <div class="keypad" id="keypad"></div>
+              </div>
+            </section>
+
+            <div class="preview-actions">
+              <section class="section-card">
+                <div class="section-heading"><span class="step-number">5</span><h2>Aperçu de l’étiquette</h2></div>
+                <div class="preview-wrap" id="previewWrap"><div class="label-empty"></div></div>
+              </section>
+            </div>
+          </div>
+        </div>
+
+        <aside class="print-sidebar">
+          <div class="section-card">
+            <div class="section-heading"><span class="step-number">6</span><h2>Impression</h2></div>
+            <div class="status-line" id="statusLine">Sélectionnez les 4 champs pour activer les actions.</div>
+          </div>
           <div class="actions-grid">
-            <button class="action-reset" id="resetButton">Réinitialiser</button>
             <button class="action-request" id="addPrintButton" disabled>Ajouter à l’impression</button>
             <button class="action-print-list" id="printQueueButton" disabled>Imprimer la liste</button>
+            <button class="action-reset" id="resetButton">Réinitialiser</button>
             <button class="action-reset" id="clearQueueButton" disabled>Vider la liste</button>
           </div>
           <div class="queue-panel">
@@ -577,7 +644,7 @@
             </div>
             <div class="queue-list" id="queueList"><div class="queue-item">Aucune étiquette ajoutée.</div></div>
           </div>
-        </div>
+        </aside>
       </div>
     </main>
 
@@ -814,12 +881,13 @@
         $("clearQueueButton").disabled = entries.length === 0;
         $("queueList").innerHTML = entries.length
           ? entries.map((entry, index) => `
-            <div class="queue-item">
+            <div class="queue-item" data-id="${entry.id}">
               <strong>${index + 1}. ${entry.zoneCode} ${entry.allee}${entry.echelle} - ${entry.emplacement}</strong>
               <span>${entry.barcodeValue}</span>
+              <button class="queue-remove" type="button" aria-label="Retirer ${entry.barcodeValue}">×</button>
             </div>
           `).join("")
-          : '<div class="queue-item">Aucune étiquette ajoutée.</div>';
+          : '<div class="queue-item empty">Aucune étiquette ajoutée.</div>';
       }
 
       function barcodeSvgMarkup(code) {
@@ -861,8 +929,8 @@
               <title>Impression étiquettes</title>
               <style>
                 @page {
-                  size: 320mm 240mm;
-                  margin: 0;
+                  size: 340mm 260mm;
+                  margin: 10mm;
                 }
                 * { box-sizing: border-box; }
                 html, body {
@@ -892,6 +960,7 @@
                   position: relative;
                   overflow: hidden;
                   background: white;
+                  border: 1pt solid #d9d9d9;
                 }
                 .print-small-index,
                 .print-zone,
@@ -984,6 +1053,20 @@
         savePrintQueue([]);
         renderPrintQueue();
         $("statusLine").textContent = "Liste d’impression vidée.";
+      });
+
+      $("queueList").addEventListener("click", (event) => {
+        const removeButton = event.target.closest(".queue-remove");
+        if (!removeButton) return;
+        const item = removeButton.closest(".queue-item");
+        const id = item?.dataset.id;
+        if (!id) return;
+        const removed = printQueue().find((entry) => entry.id === id);
+        savePrintQueue(printQueue().filter((entry) => entry.id !== id));
+        renderPrintQueue();
+        $("statusLine").textContent = removed
+          ? `Étiquette ${removed.barcodeValue} retirée de la liste.`
+          : "Étiquette retirée de la liste.";
       });
 
       $("historyButton").addEventListener("click", () => {

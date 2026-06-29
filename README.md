@@ -178,25 +178,26 @@ Flux d'utilisation :
 2. Vérifier l'aperçu de l'étiquette.
 3. Cliquer sur `Ajouter à l'impression`.
 4. Répéter pour toutes les étiquettes voulues.
-5. Cliquer sur `Imprimer la liste`.
+5. Retirer une étiquette ajoutée par erreur avec la croix `×`, si besoin.
+6. Cliquer sur `Imprimer la liste`.
 
-L'impression ouvre la boîte d'impression du navigateur avec une planche de 24 emplacements maximum : 4 colonnes de `80mm` et 6 lignes de `40mm`.
+L'impression ouvre la boîte d'impression du navigateur avec une planche de 24 emplacements maximum : 4 colonnes de `80mm` et 6 lignes de `40mm`. Une marge de `10mm` est ajoutée autour de la planche et chaque étiquette a un contour gris clair de `1pt` pour faciliter le découpage.
 
 Le CSS d'impression demande donc une feuille personnalisée :
 
 ```css
 @page {
-  size: 320mm 240mm;
-  margin: 0;
+  size: 340mm 260mm;
+  margin: 10mm;
 }
 ```
 
-Important : 4 colonnes de `80mm` font `320mm`, donc cette planche ne tient pas sur un A4 à taille réelle. Si la boîte d'impression reste en A4, il faudra choisir `adapter à la page`, ce qui réduira les étiquettes. Pour garder des étiquettes réellement `80mm x 40mm`, il faut un format papier personnalisé `320mm x 240mm` ou une imprimante/support adapté.
+Important : 4 colonnes de `80mm` font `320mm`, et avec les marges la feuille totale mesure `340mm x 260mm`. Cette planche ne tient donc pas sur un A4 à taille réelle. Si la boîte d'impression reste en A4, il faudra choisir `adapter à la page`, ce qui réduira les étiquettes. Pour garder des étiquettes réellement `80mm x 40mm`, il faut un format papier personnalisé `340mm x 260mm` ou une imprimante/support adapté.
 
 Selon le navigateur, le pilote et l'imprimante, il peut être nécessaire de confirmer manuellement :
 
-- format papier : `320mm x 240mm`
-- marges : aucune ou minimum
+- format papier : `340mm x 260mm`
+- marges : utiliser les marges de la page ou aucune marge supplémentaire côté pilote
 - échelle : 100 %
 
 L'app locale sera accessible via l'URL affichée par Vite, généralement :
