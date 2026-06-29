@@ -63,6 +63,7 @@
         display: flex;
         align-items: center;
         gap: 16px;
+        min-width: 0;
       }
 
       .barcode-logo {
@@ -76,6 +77,7 @@
         border-radius: 8px;
         background: linear-gradient(135deg, rgba(0, 107, 255, 0.2), rgba(139, 44, 255, 0.16));
         box-shadow: 0 0 22px rgba(0, 212, 255, 0.22);
+        flex: 0 0 48px;
       }
 
       .barcode-logo span {
@@ -92,9 +94,14 @@
       }
 
       h1 {
-        font-size: clamp(22px, 2.4vw, 32px);
+        font-size: clamp(20px, 2.1vw, 30px);
         line-height: 1.02;
         font-weight: 900;
+        overflow-wrap: anywhere;
+      }
+
+      .brand-copy {
+        min-width: 0;
       }
 
       .brand p {
@@ -103,17 +110,18 @@
         font-size: 14px;
       }
 
-      .history-button {
+      .credit-button {
         min-height: 46px;
         padding: 0 18px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        border: 1px solid rgba(0, 212, 255, 0.44);
+        border: 1px solid transparent;
         border-radius: 8px;
-        color: var(--text-main);
-        background: rgba(7, 20, 38, 0.92);
+        color: var(--text-muted);
+        background: transparent;
         font-weight: 800;
+        white-space: nowrap;
       }
 
       .section-card {
@@ -278,7 +286,7 @@
       .label-empty,
       .label-preview {
         width: min(420px, 100%);
-        aspect-ratio: 72 / 38;
+        aspect-ratio: 70 / 38;
       }
 
       .label-preview {
@@ -298,38 +306,44 @@
       }
 
       .label-small-index {
-        left: 4%;
-        top: 36%;
-        font-size: 7cqh;
+        left: 6.4%;
+        top: 10.5%;
+        height: 21%;
+        display: flex;
+        align-items: center;
+        font-size: 11cqh;
         font-weight: 400;
         line-height: 1;
-        transform: translateY(-50%);
       }
 
       .label-zone {
-        left: 12%;
-        top: 28%;
-        font-size: 25cqh;
+        left: 14.3%;
+        top: 10.5%;
+        height: 21%;
+        display: flex;
+        align-items: center;
+        font-size: 29cqh;
         font-weight: 400;
         line-height: 1;
-        transform: translateY(-50%);
         white-space: nowrap;
       }
 
       .label-barcode {
-        left: 46%;
-        top: 8%;
-        width: 43%;
-        height: 20%;
+        left: 45.7%;
+        top: 10.5%;
+        width: 50%;
+        height: 21%;
       }
 
       .label-location {
-        left: 67%;
-        top: 83%;
-        font-size: 54cqh;
+        right: 4.3%;
+        top: 47.4%;
+        height: 42.1%;
+        display: flex;
+        align-items: center;
+        font-size: 48cqh;
         font-weight: 700;
         line-height: 1;
-        transform: translate(-50%, -100%);
         white-space: nowrap;
       }
 
@@ -338,6 +352,10 @@
         color: var(--text-muted);
         text-align: center;
         font-weight: 700;
+      }
+
+      .status-line[hidden] {
+        display: none;
       }
 
       .actions-grid {
@@ -376,10 +394,10 @@
       }
 
       .action-request {
-        border: 1px solid #a855f7;
+        border: 1px solid #22c55e;
         color: white;
-        background: linear-gradient(135deg, #5b21b6, #8b2cff);
-        box-shadow: 0 0 18px rgba(139, 44, 255, 0.45);
+        background: linear-gradient(135deg, #15803d, #22c55e);
+        box-shadow: 0 0 18px rgba(34, 197, 94, 0.42);
       }
 
       .action-print-list {
@@ -596,12 +614,12 @@
       <header class="app-header">
         <div class="brand">
           <div class="barcode-logo" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
-          <div>
+          <div class="brand-copy">
             <h1>ÉTIQUETTE EMPLACEMENT PRODUIT</h1>
             <p>Générez vos étiquettes d’emplacement en quelques secondes</p>
           </div>
         </div>
-        <button class="history-button" id="historyButton">Historique</button>
+        <button class="credit-button" id="creditButton">développé par @olivierdern</button>
       </header>
 
       <div class="app-workspace">
@@ -640,10 +658,7 @@
         </div>
 
         <aside class="print-sidebar">
-          <div class="section-card">
-            <div class="section-heading"><span class="step-number">6</span><h2>Impression</h2></div>
-            <div class="status-line" id="statusLine">Sélectionnez les 4 champs pour activer les actions.</div>
-          </div>
+          <div class="status-line" id="statusLine" hidden>Sélectionnez les 4 champs pour activer les actions.</div>
           <div class="actions-grid">
             <button class="action-request" id="addPrintButton" disabled>Ajouter à l’impression</button>
             <button class="action-print-list" id="printQueueButton" disabled>Imprimer la liste</button>
@@ -722,6 +737,11 @@
         return `902${zoneCodes[state.zone]}${state.allee}${formatEchelle(state.echelle)}${emplacement}`;
       }
 
+      function driveAddress(entry) {
+        if (entry.driveAddress) return entry.driveAddress;
+        return `${entry.zoneCode} ${entry.allee}${entry.echelle} ${entry.emplacement}`;
+      }
+
       function history() {
         try {
           return JSON.parse(localStorage.getItem(historyKey) || "[]");
@@ -746,12 +766,17 @@
         localStorage.setItem(printQueueKey, JSON.stringify(entries));
       }
 
+      function clearPrintQueue() {
+        savePrintQueue([]);
+        renderPrintQueue();
+      }
+
       function formatRequestLine(entry) {
         const date = new Date(entry.createdAt).toLocaleString("fr-FR");
         return [
           date,
           entry.action,
-          `Code: ${entry.barcodeValue}`,
+          `Adresse Drive: ${driveAddress(entry)}`,
           `Zone: ${entry.zone}`,
           `Allée: ${entry.allee}`,
           `Échelle: ${entry.echelle}`,
@@ -792,7 +817,9 @@
         const complete = Boolean(code);
         $("locationDisplay").textContent = formatted || "000";
         $("addPrintButton").disabled = !complete;
-        $("statusLine").textContent = complete ? `Étiquette prête : ${code}.` : "Sélectionnez les 4 champs pour activer les actions.";
+        $("statusLine").textContent = complete
+          ? `Étiquette prête : ${zoneCodes[state.zone]} ${state.allee}${formatEchelle(state.echelle)} ${formatted}.`
+          : "Sélectionnez les 4 champs pour activer les actions.";
 
         if (!complete) {
           $("previewWrap").innerHTML = '<div class="label-empty"></div>';
@@ -862,7 +889,7 @@
         $("historyList").innerHTML = entries.length
           ? entries.map((entry) => `
             <article class="history-item">
-              <div><strong>${entry.action}</strong><span>${entry.barcodeValue}</span></div>
+              <div><strong>${entry.action}</strong><span>${driveAddress(entry)}</span></div>
               <time>${new Date(entry.createdAt).toLocaleString("fr-FR")}</time>
             </article>
           `).join("")
@@ -881,6 +908,7 @@
           allee: state.allee,
           echelle: formatEchelle(state.echelle),
           emplacement: formatted,
+          driveAddress: `${zoneCodes[state.zone]} ${state.allee}${formatEchelle(state.echelle)} ${formatted}`,
           barcodeValue: code,
           createdAt: new Date().toISOString(),
         };
@@ -894,9 +922,9 @@
         $("queueList").innerHTML = entries.length
           ? entries.map((entry, index) => `
             <div class="queue-item" data-id="${entry.id}">
-              <strong>${index + 1}. ${entry.zoneCode} ${entry.allee}${entry.echelle} - ${entry.emplacement}</strong>
-              <span>${entry.barcodeValue}</span>
-              <button class="queue-remove" type="button" aria-label="Retirer ${entry.barcodeValue}">×</button>
+              <strong>${driveAddress(entry)}</strong>
+              <span>${entry.zone}</span>
+              <button class="queue-remove" type="button" aria-label="Retirer ${driveAddress(entry)}">×</button>
             </div>
           `).join("")
           : '<div class="queue-item empty">Aucune étiquette ajoutée.</div>';
@@ -928,6 +956,7 @@
       function printQueuedLabels() {
         const entries = printQueue();
         if (!entries.length) return;
+        const shouldClearQueue = window.confirm("Voulez-vous vider la file d’attente après avoir lancé l’impression ?");
         const printWindow = window.open("", "_blank");
         if (!printWindow) {
           $("statusLine").textContent = "Le navigateur a bloqué la fenêtre d’impression.";
@@ -941,8 +970,8 @@
               <title>Impression étiquettes</title>
               <style>
                 @page {
-                  size: 308mm 248mm;
-                  margin: 0;
+                  size: A4 landscape;
+                  margin: 10mm 8.5mm;
                 }
                 * { box-sizing: border-box; }
                 html, body {
@@ -953,12 +982,12 @@
                   font-family: Arial, Helvetica, sans-serif;
                 }
                 .print-sheet {
-                  width: 308mm;
-                  height: 248mm;
-                  padding: 10mm;
+                  width: 280mm;
+                  height: 190mm;
+                  padding: 0;
                   display: grid;
-                  grid-template-columns: repeat(4, 72mm);
-                  grid-template-rows: repeat(6, 38mm);
+                  grid-template-columns: repeat(4, 70mm);
+                  grid-template-rows: repeat(5, 38mm);
                   page-break-after: always;
                   break-after: page;
                   background: white;
@@ -968,7 +997,7 @@
                   break-after: auto;
                 }
                 .print-label {
-                  width: 72mm;
+                  width: 70mm;
                   height: 38mm;
                   position: relative;
                   overflow: hidden;
@@ -982,54 +1011,67 @@
                   position: absolute;
                 }
                 .print-small-index {
-                  left: 4%;
-                  top: 36%;
-                  font-size: 2.66mm;
+                  left: 4.5mm;
+                  top: 4mm;
+                  height: 8mm;
+                  display: flex;
+                  align-items: center;
+                  font-size: 4.2mm;
                   font-weight: 400;
                   line-height: 1;
-                  transform: translateY(-50%);
                 }
                 .print-zone {
-                  left: 12%;
-                  top: 28%;
-                  font-size: 9.5mm;
+                  left: 10mm;
+                  top: 4mm;
+                  height: 8mm;
+                  display: flex;
+                  align-items: center;
+                  font-size: 11mm;
                   font-weight: 400;
                   line-height: 1;
                   white-space: nowrap;
-                  transform: translateY(-50%);
                 }
                 .print-barcode {
-                  left: 46%;
-                  top: 8%;
-                  width: 43%;
-                  height: 20%;
+                  left: 32mm;
+                  top: 4mm;
+                  width: 35mm;
+                  height: 8mm;
                 }
                 .print-barcode svg {
                   width: 100%;
                   height: 100%;
                 }
                 .print-location {
-                  left: 67%;
-                  top: 83%;
-                  font-size: 20.52mm;
+                  right: 3mm;
+                  top: 18mm;
+                  height: 16mm;
+                  display: flex;
+                  align-items: center;
+                  font-size: 18mm;
                   font-weight: 700;
                   line-height: 1;
                   white-space: nowrap;
-                  transform: translate(-50%, -100%);
                 }
               </style>
             </head>
-            <body>${Array.from({ length: Math.ceil(entries.length / 24) }, (_, sheetIndex) => {
-              const sheetEntries = entries.slice(sheetIndex * 24, sheetIndex * 24 + 24);
+            <body>${Array.from({ length: Math.ceil(entries.length / 20) }, (_, sheetIndex) => {
+              const sheetEntries = entries.slice(sheetIndex * 20, sheetIndex * 20 + 20);
               return `<main class="print-sheet">${sheetEntries.map(printableLabelMarkup).join("")}</main>`;
             }).join("")}</body>
           </html>
         `);
         printWindow.document.close();
         printWindow.focus();
-        setTimeout(() => printWindow.print(), 250);
+        setTimeout(() => {
+          printWindow.print();
+          if (shouldClearQueue) {
+            clearPrintQueue();
+            $("statusLine").textContent = "File d’attente vidée après lancement de l’impression.";
+          }
+        }, 250);
       }
 
+      savePrintQueue([]);
       renderChoiceButtons(zones, "zoneGrid", "zone-button", (zone) => (state.zone = zone));
       renderChoiceButtons(allees, "alleeGrid", "allee-button", (allee) => (state.allee = allee));
       renderChoiceButtons(echelles, "echelleGrid", "echelle-button", (echelle) => (state.echelle = echelle));
@@ -1057,14 +1099,13 @@
         savePrintQueue([...printQueue(), entry]);
         saveHistory([entry, ...history()]);
         renderPrintQueue();
-        resetForm(`Étiquette ${entry.barcodeValue} ajoutée à la liste d’impression.`);
+        resetForm(`Étiquette ${driveAddress(entry)} ajoutée à la liste d’impression.`);
       });
 
       $("printQueueButton").addEventListener("click", printQueuedLabels);
 
       $("clearQueueButton").addEventListener("click", () => {
-        savePrintQueue([]);
-        renderPrintQueue();
+        clearPrintQueue();
         $("statusLine").textContent = "Liste d’impression vidée.";
       });
 
@@ -1078,13 +1119,18 @@
         savePrintQueue(printQueue().filter((entry) => entry.id !== id));
         renderPrintQueue();
         $("statusLine").textContent = removed
-          ? `Étiquette ${removed.barcodeValue} retirée de la liste.`
+          ? `Étiquette ${driveAddress(removed)} retirée de la liste.`
           : "Étiquette retirée de la liste.";
       });
 
-      $("historyButton").addEventListener("click", () => {
-        renderHistory();
-        $("historyOverlay").classList.add("open");
+      let creditTimer = null;
+      $("creditButton").addEventListener("click", () => {
+        const creditButton = $("creditButton");
+        creditButton.textContent = "Bisou";
+        clearTimeout(creditTimer);
+        creditTimer = setTimeout(() => {
+          creditButton.textContent = "développé par @olivierdern";
+        }, 1000);
       });
       $("closeHistory").addEventListener("click", () => $("historyOverlay").classList.remove("open"));
       $("clearHistory").addEventListener("click", () => {

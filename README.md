@@ -23,15 +23,15 @@ L'utilisateur sélectionne :
 3. Échelle
 4. Emplacement via clavier numérique
 
-Puis l'application affiche une étiquette blanche au ratio `72mm x 38mm`, génère un code-barres Code 128 et propose :
+Puis l'application affiche une étiquette blanche au ratio `70mm x 38mm`, génère un code-barres Code 128 et propose :
 
 - `Réinitialiser`
 - `Ajouter à l'impression`
 - `Imprimer la liste`
 - `Vider la liste`
-- `Historique`
+- crédit `développé par @olivierdern`
 
-La version actuelle est pensée pour fonctionner comme une simple page web sur un PC sans autorisations particulières. Elle ne dépend d'aucun endpoint backend. Les étiquettes ajoutées à l'impression sont stockées dans une file locale du navigateur via `localStorage`, puis imprimées ensemble au format `72mm x 38mm`.
+La version actuelle est pensée pour fonctionner comme une simple page web sur un PC sans autorisations particulières. Elle ne dépend d'aucun endpoint backend. Les étiquettes ajoutées à l'impression sont stockées dans une file locale temporaire, vidée automatiquement à chaque ouverture de la page, puis imprimées ensemble au format figé `70mm x 38mm`.
 
 Une version autonome hors ligne est disponible avec :
 
@@ -84,7 +84,7 @@ Disposition actuelle :
 
 ```json
 {
-  "label": { "width": "72mm", "height": "38mm" },
+  "label": { "width": "70mm", "height": "38mm" },
   "smallIndex": { "x": "4%", "y": "36%", "fontWeight": "400", "fontSize": "7%" },
   "zone": { "x": "12%", "y": "28%", "fontWeight": "400", "fontSize": "25%" },
   "barcode": { "type": "CODE128", "x": "46%", "y": "8%", "width": "43%", "height": "20%" },
@@ -103,8 +103,8 @@ Fichiers concernés :
 
 La dernière version compacte vise à éviter le scroll sur tablette/écran paysage :
 
-- Zone sur une seule ligne en écran large.
-- Allée A-Z sur une seule ligne en écran large.
+- Zone sur deux lignes en écran large.
+- Allée A-Z sur deux lignes en écran large.
 - Échelle sur une ligne.
 - Emplacement à gauche.
 - Aperçu + statut + actions à droite.
@@ -180,30 +180,39 @@ Flux d'utilisation :
 4. Répéter pour toutes les étiquettes voulues.
 5. Retirer une étiquette ajoutée par erreur avec la croix `×`, si besoin.
 6. Cliquer sur `Imprimer la liste`.
+7. Confirmer si la file d'attente doit être vidée après le lancement de l'impression.
 
-L'impression ouvre la boîte d'impression du navigateur avec une planche de 24 emplacements maximum : 4 colonnes de `72mm` et 6 lignes de `38mm`. Une marge de `10mm` est ajoutée autour de la planche et chaque étiquette a un contour gris clair de `1pt` pour faciliter le découpage.
+L'impression ouvre la boîte d'impression du navigateur avec une planche de 20 emplacements maximum : 4 colonnes de `70mm` et 5 lignes de `38mm`. La grille est faite pour un A4 paysage à taille réelle : 280mm de largeur utile et 190mm de hauteur utile. Chaque étiquette a un contour gris clair de `1pt` pour faciliter le découpage.
 
-Le CSS d'impression demande donc une feuille personnalisée :
+Le CSS d'impression demande donc un A4 paysage :
 
 ```css
 @page {
-  size: 308mm 248mm;
-  margin: 0;
+  size: A4 landscape;
+  margin: 10mm 8.5mm;
 }
 
 .print-sheet {
-  width: 308mm;
-  height: 248mm;
-  padding: 10mm;
+  width: 280mm;
+  height: 190mm;
+  display: grid;
+  grid-template-columns: repeat(4, 70mm);
+  grid-template-rows: repeat(5, 38mm);
+}
+
+.print-label {
+  width: 70mm;
+  height: 38mm;
 }
 ```
 
-Important : 4 colonnes de `72mm` font `288mm`, et avec les marges la feuille totale mesure `308mm x 248mm`. Cette planche ne tient donc pas sur un A4 à taille réelle. Si la boîte d'impression reste en A4, il faudra choisir `adapter à la page`, ce qui réduira les étiquettes. Pour garder des étiquettes réellement `72mm x 38mm`, il faut un format papier personnalisé `308mm x 248mm` ou une imprimante/support adapté.
+Important : pour garder les étiquettes réellement en `70mm x 38mm`, la boîte d'impression doit rester en A4 paysage avec une échelle à `100 %`. Ne pas choisir `adapter à la page`, car cela réduit les dimensions physiques.
 
 Selon le navigateur, le pilote et l'imprimante, il peut être nécessaire de confirmer manuellement :
 
-- format papier : `308mm x 248mm`
-- marges : aucune marge supplémentaire côté pilote
+- format papier : `A4`
+- orientation : `paysage`
+- marges : utiliser les marges CSS / par défaut, sans marge supplémentaire côté pilote
 - échelle : 100 %
 
 L'app locale sera accessible via l'URL affichée par Vite, généralement :
