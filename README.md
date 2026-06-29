@@ -188,7 +188,13 @@ Le CSS d'impression demande donc une feuille personnalisée :
 ```css
 @page {
   size: 340mm 260mm;
-  margin: 10mm;
+  margin: 0;
+}
+
+.print-sheet {
+  width: 340mm;
+  height: 260mm;
+  padding: 10mm;
 }
 ```
 
@@ -197,7 +203,7 @@ Important : 4 colonnes de `80mm` font `320mm`, et avec les marges la feuille tot
 Selon le navigateur, le pilote et l'imprimante, il peut être nécessaire de confirmer manuellement :
 
 - format papier : `340mm x 260mm`
-- marges : utiliser les marges de la page ou aucune marge supplémentaire côté pilote
+- marges : aucune marge supplémentaire côté pilote
 - échelle : 100 %
 
 L'app locale sera accessible via l'URL affichée par Vite, généralement :

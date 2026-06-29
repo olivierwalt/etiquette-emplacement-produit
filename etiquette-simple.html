@@ -155,11 +155,11 @@
       }
 
       .zone-grid {
-        grid-template-columns: repeat(9, minmax(0, 1fr));
+        grid-template-columns: repeat(5, minmax(0, 1fr));
       }
 
       .allee-grid {
-        grid-template-columns: repeat(26, minmax(0, 1fr));
+        grid-template-columns: repeat(13, minmax(0, 1fr));
       }
 
       .echelle-grid {
@@ -183,20 +183,20 @@
       }
 
       .zone-button {
-        height: 48px;
+        height: 44px;
         padding: 0 6px;
-        font-size: 14px;
+        font-size: 13px;
       }
 
       .allee-button,
       .echelle-button {
-        height: 44px;
-        font-size: 16px;
+        height: 40px;
+        font-size: 15px;
       }
 
       .app-workspace {
         display: grid;
-        grid-template-columns: minmax(0, 2fr) minmax(300px, 1fr);
+        grid-template-columns: minmax(0, 2fr) minmax(360px, 1fr);
         gap: 12px;
         align-items: start;
       }
@@ -230,13 +230,13 @@
 
       .emplacement-layout {
         display: grid;
-        grid-template-columns: 1fr 176px;
+        grid-template-columns: minmax(0, 1fr) 176px;
         align-items: center;
         gap: 14px;
       }
 
       .location-display {
-        height: 132px;
+        height: 112px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -245,7 +245,7 @@
         background:
           linear-gradient(135deg, rgba(0, 107, 255, 0.2), rgba(139, 44, 255, 0.16)),
           rgba(7, 20, 38, 0.9);
-        font-size: clamp(56px, 6vw, 84px);
+        font-size: clamp(48px, 5vw, 72px);
         font-weight: 900;
       }
 
@@ -930,7 +930,7 @@
               <style>
                 @page {
                   size: 340mm 260mm;
-                  margin: 10mm;
+                  margin: 0;
                 }
                 * { box-sizing: border-box; }
                 html, body {
@@ -941,8 +941,9 @@
                   font-family: Arial, Helvetica, sans-serif;
                 }
                 .print-sheet {
-                  width: 320mm;
-                  height: 240mm;
+                  width: 340mm;
+                  height: 260mm;
+                  padding: 10mm;
                   display: grid;
                   grid-template-columns: repeat(4, 80mm);
                   grid-template-rows: repeat(6, 40mm);
