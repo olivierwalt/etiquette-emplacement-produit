@@ -180,7 +180,7 @@ Flux d'utilisation :
 4. Répéter pour toutes les étiquettes voulues.
 5. Retirer une étiquette ajoutée par erreur avec la croix `×`, si besoin.
 6. Cliquer sur `Imprimer la liste`.
-7. Confirmer si la file d'attente doit être vidée après le lancement de l'impression.
+7. Choisir `Oui` ou `Non` directement dans l'interface quand le bouton d'impression demande si la file d'attente doit être vidée après impression.
 
 L'impression ouvre la boîte d'impression du navigateur avec une planche de 20 emplacements maximum : 4 colonnes de `70mm` et 5 lignes de `38mm`. La grille est faite pour un A4 paysage à taille réelle : 280mm de largeur utile et 190mm de hauteur utile. Chaque étiquette a un contour gris clair de `1pt` pour faciliter le découpage.
 

@@ -407,6 +407,47 @@
         box-shadow: 0 0 18px rgba(0, 212, 255, 0.28);
       }
 
+      .print-confirm {
+        min-height: 68px;
+        display: none;
+        grid-template-columns: 1fr auto auto;
+        gap: 8px;
+        align-items: center;
+        padding: 8px;
+        border: 1px solid rgba(0, 212, 255, 0.44);
+        border-radius: 8px;
+        background: rgba(7, 20, 38, 0.92);
+      }
+
+      .print-confirm.open {
+        display: grid;
+      }
+
+      .print-confirm span {
+        color: white;
+        font-size: 15px;
+        font-weight: 900;
+        line-height: 1.1;
+      }
+
+      .print-confirm button {
+        width: 64px;
+        height: 48px;
+        font-size: 16px;
+      }
+
+      .confirm-yes {
+        border: 1px solid #22c55e;
+        color: white;
+        background: linear-gradient(135deg, #15803d, #22c55e);
+      }
+
+      .confirm-no {
+        border: 1px solid rgba(148, 163, 184, 0.45);
+        color: white;
+        background: rgba(15, 23, 42, 0.9);
+      }
+
       .queue-panel {
         display: grid;
         gap: 8px;
@@ -662,6 +703,11 @@
           <div class="actions-grid">
             <button class="action-request" id="addPrintButton" disabled>Ajouter à l’impression</button>
             <button class="action-print-list" id="printQueueButton" disabled>Imprimer la liste</button>
+            <div class="print-confirm" id="printConfirm" aria-live="polite">
+              <span>Vider la file d’attente après impression ?</span>
+              <button class="confirm-yes" id="confirmPrintClear" type="button">Oui</button>
+              <button class="confirm-no" id="confirmPrintKeep" type="button">Non</button>
+            </div>
             <button class="action-reset" id="resetButton">Réinitialiser</button>
             <button class="action-reset" id="clearQueueButton" disabled>Vider la liste</button>
           </div>
@@ -718,6 +764,7 @@
       const state = { zone: null, allee: null, echelle: null, emplacement: "" };
       const historyKey = "etiquette-emplacement-produit-history";
       const printQueueKey = "etiquette-emplacement-produit-print-queue";
+      let printConfirmOpen = false;
 
       const $ = (id) => document.getElementById(id);
 
@@ -917,7 +964,10 @@
       function renderPrintQueue() {
         const entries = printQueue();
         $("queueCount").textContent = `${entries.length} étiquette${entries.length > 1 ? "s" : ""} en attente`;
-        $("printQueueButton").disabled = entries.length === 0;
+        if (!entries.length) printConfirmOpen = false;
+        $("printQueueButton").disabled = entries.length === 0 || printConfirmOpen;
+        $("printQueueButton").style.display = printConfirmOpen ? "none" : "inline-flex";
+        $("printConfirm").classList.toggle("open", printConfirmOpen);
         $("clearQueueButton").disabled = entries.length === 0;
         $("queueList").innerHTML = entries.length
           ? entries.map((entry, index) => `
@@ -953,13 +1003,14 @@
         `;
       }
 
-      function printQueuedLabels() {
+      function printQueuedLabels(shouldClearQueue) {
         const entries = printQueue();
         if (!entries.length) return;
-        const shouldClearQueue = window.confirm("Voulez-vous vider la file d’attente après avoir lancé l’impression ?");
         const printWindow = window.open("", "_blank");
         if (!printWindow) {
           $("statusLine").textContent = "Le navigateur a bloqué la fenêtre d’impression.";
+          printConfirmOpen = false;
+          renderPrintQueue();
           return;
         }
         printWindow.document.write(`
@@ -1067,8 +1118,17 @@
           if (shouldClearQueue) {
             clearPrintQueue();
             $("statusLine").textContent = "File d’attente vidée après lancement de l’impression.";
+          } else {
+            printConfirmOpen = false;
+            renderPrintQueue();
           }
         }, 250);
+      }
+
+      function askPrintClearPreference() {
+        if (!printQueue().length) return;
+        printConfirmOpen = true;
+        renderPrintQueue();
       }
 
       savePrintQueue([]);
@@ -1102,7 +1162,9 @@
         resetForm(`Étiquette ${driveAddress(entry)} ajoutée à la liste d’impression.`);
       });
 
-      $("printQueueButton").addEventListener("click", printQueuedLabels);
+      $("printQueueButton").addEventListener("click", askPrintClearPreference);
+      $("confirmPrintClear").addEventListener("click", () => printQueuedLabels(true));
+      $("confirmPrintKeep").addEventListener("click", () => printQueuedLabels(false));
 
       $("clearQueueButton").addEventListener("click", () => {
         clearPrintQueue();
