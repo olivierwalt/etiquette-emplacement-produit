@@ -354,6 +354,60 @@
         box-shadow: 0 0 18px rgba(139, 44, 255, 0.45);
       }
 
+      .action-print-list {
+        border: 1px solid var(--cyan);
+        color: white;
+        background: linear-gradient(135deg, #006bff, #0047ff);
+        box-shadow: 0 0 18px rgba(0, 212, 255, 0.28);
+      }
+
+      .queue-panel {
+        display: grid;
+        gap: 8px;
+        padding: 10px;
+        border: 1px solid rgba(56, 189, 248, 0.22);
+        border-radius: 8px;
+        background: rgba(15, 23, 42, 0.62);
+      }
+
+      .queue-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        color: var(--text-muted);
+        font-weight: 800;
+      }
+
+      .queue-clear {
+        height: 36px;
+        padding: 0 12px;
+        border: 1px solid rgba(239, 68, 68, 0.5);
+        border-radius: 8px;
+        color: white;
+        background: rgba(239, 68, 68, 0.12);
+        font-weight: 800;
+      }
+
+      .queue-list {
+        display: grid;
+        gap: 6px;
+        max-height: 96px;
+        overflow: auto;
+      }
+
+      .queue-item {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 8px 10px;
+        border: 1px solid rgba(148, 163, 184, 0.22);
+        border-radius: 8px;
+        background: rgba(3, 7, 18, 0.55);
+        color: var(--text-muted);
+        font-size: 13px;
+      }
+
       .history-overlay {
         position: fixed;
         inset: 0;
@@ -430,6 +484,18 @@
         font-weight: 800;
       }
 
+      .export-history-button {
+        width: 100%;
+        height: 52px;
+        margin-top: 16px;
+        border: 1px solid var(--cyan);
+        border-radius: 8px;
+        color: white;
+        background: linear-gradient(135deg, #006bff, #0047ff);
+        box-shadow: 0 0 18px rgba(0, 212, 255, 0.28);
+        font-weight: 800;
+      }
+
       @media (max-width: 920px) {
         .app-header {
           align-items: flex-start;
@@ -501,7 +567,15 @@
           <div class="status-line" id="statusLine">Sélectionnez les 4 champs pour activer les actions.</div>
           <div class="actions-grid">
             <button class="action-reset" id="resetButton">Réinitialiser</button>
-            <button class="action-request" id="requestButton" disabled>Demande d’impression</button>
+            <button class="action-request" id="addPrintButton" disabled>Ajouter à l’impression</button>
+            <button class="action-print-list" id="printQueueButton" disabled>Imprimer la liste</button>
+            <button class="action-reset" id="clearQueueButton" disabled>Vider la liste</button>
+          </div>
+          <div class="queue-panel">
+            <div class="queue-header">
+              <span id="queueCount">0 étiquette en attente</span>
+            </div>
+            <div class="queue-list" id="queueList"><div class="queue-item">Aucune étiquette ajoutée.</div></div>
           </div>
         </div>
       </div>
@@ -517,6 +591,7 @@
           <button class="icon-button" id="closeHistory">×</button>
         </div>
         <div class="history-list" id="historyList"></div>
+        <button class="export-history-button" id="exportHistory">Exporter les demandes (.txt)</button>
         <button class="clear-history-button" id="clearHistory">Vider l’historique</button>
       </div>
     </div>
@@ -548,6 +623,7 @@
       const echelles = Array.from({ length: 15 }, (_, i) => i + 1);
       const state = { zone: null, allee: null, echelle: null, emplacement: "" };
       const historyKey = "etiquette-emplacement-produit-history";
+      const printQueueKey = "etiquette-emplacement-produit-print-queue";
 
       const $ = (id) => document.getElementById(id);
 
@@ -579,6 +655,52 @@
         localStorage.setItem(historyKey, JSON.stringify(entries.slice(0, 30)));
       }
 
+      function printQueue() {
+        try {
+          return JSON.parse(localStorage.getItem(printQueueKey) || "[]");
+        } catch {
+          return [];
+        }
+      }
+
+      function savePrintQueue(entries) {
+        localStorage.setItem(printQueueKey, JSON.stringify(entries));
+      }
+
+      function formatRequestLine(entry) {
+        const date = new Date(entry.createdAt).toLocaleString("fr-FR");
+        return [
+          date,
+          entry.action,
+          `Code: ${entry.barcodeValue}`,
+          `Zone: ${entry.zone}`,
+          `Allée: ${entry.allee}`,
+          `Échelle: ${entry.echelle}`,
+          `Emplacement: ${entry.emplacement}`,
+        ].join(" | ");
+      }
+
+      function buildRequestsText(entries) {
+        if (!entries.length) return "Aucune demande d’impression enregistrée.\n";
+        const header = [
+          "DEMANDES D’IMPRESSION - ÉTIQUETTES EMPLACEMENT PRODUIT",
+          `Export généré le ${new Date().toLocaleString("fr-FR")}`,
+          "",
+        ];
+        return `${header.join("\n")}${entries.map(formatRequestLine).join("\n")}\n`;
+      }
+
+      function downloadRequestsText() {
+        const blob = new Blob([buildRequestsText(history())], { type: "text/plain;charset=utf-8" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "demandes-impression-etiquettes.txt";
+        document.body.appendChild(link);
+        link.click();
+        URL.revokeObjectURL(link.href);
+        link.remove();
+      }
+
       function setActive(container, value) {
         [...container.querySelectorAll("button")].forEach((button) => {
           button.classList.toggle("active", button.dataset.value === String(value));
@@ -590,7 +712,7 @@
         const code = barcodeValue();
         const complete = Boolean(code);
         $("locationDisplay").textContent = formatted || "000";
-        $("requestButton").disabled = !complete;
+        $("addPrintButton").disabled = !complete;
         $("statusLine").textContent = complete ? `Étiquette prête : ${code}.` : "Sélectionnez les 4 champs pour activer les actions.";
 
         if (!complete) {
@@ -668,11 +790,159 @@
           : "<p>Aucune demande pour le moment.</p>";
       }
 
+      function currentEntry() {
+        const code = barcodeValue();
+        const formatted = formatEmplacement(state.emplacement);
+        if (!code || !formatted) return null;
+        return {
+          id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}`,
+          action: "Ajout à l’impression",
+          zone: state.zone,
+          zoneCode: zoneCodes[state.zone],
+          allee: state.allee,
+          echelle: formatEchelle(state.echelle),
+          emplacement: formatted,
+          barcodeValue: code,
+          createdAt: new Date().toISOString(),
+        };
+      }
+
+      function renderPrintQueue() {
+        const entries = printQueue();
+        $("queueCount").textContent = `${entries.length} étiquette${entries.length > 1 ? "s" : ""} en attente`;
+        $("printQueueButton").disabled = entries.length === 0;
+        $("clearQueueButton").disabled = entries.length === 0;
+        $("queueList").innerHTML = entries.length
+          ? entries.map((entry, index) => `
+            <div class="queue-item">
+              <strong>${index + 1}. ${entry.zoneCode} ${entry.allee}${entry.echelle} - ${entry.emplacement}</strong>
+              <span>${entry.barcodeValue}</span>
+            </div>
+          `).join("")
+          : '<div class="queue-item">Aucune étiquette ajoutée.</div>';
+      }
+
+      function barcodeSvgMarkup(code) {
+        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        JsBarcode(svg, code, {
+          format: "CODE128",
+          displayValue: false,
+          margin: 0,
+          width: 1.4,
+          height: 42,
+        });
+        return svg.outerHTML;
+      }
+
+      function printableLabelMarkup(entry) {
+        return `
+          <section class="print-label">
+            <div class="print-small-index">${entry.zoneCode}</div>
+            <div class="print-zone">${entry.allee}${entry.echelle}</div>
+            <div class="print-barcode">${barcodeSvgMarkup(entry.barcodeValue)}</div>
+            <div class="print-location">${entry.emplacement}</div>
+          </section>
+        `;
+      }
+
+      function printQueuedLabels() {
+        const entries = printQueue();
+        if (!entries.length) return;
+        const printWindow = window.open("", "_blank");
+        if (!printWindow) {
+          $("statusLine").textContent = "Le navigateur a bloqué la fenêtre d’impression.";
+          return;
+        }
+        printWindow.document.write(`
+          <!doctype html>
+          <html lang="fr">
+            <head>
+              <meta charset="utf-8" />
+              <title>Impression étiquettes</title>
+              <style>
+                @page {
+                  size: 80mm 40mm;
+                  margin: 0;
+                }
+                * { box-sizing: border-box; }
+                html, body {
+                  margin: 0;
+                  padding: 0;
+                  background: white;
+                  color: black;
+                  font-family: Arial, Helvetica, sans-serif;
+                }
+                .print-label {
+                  width: 80mm;
+                  height: 40mm;
+                  position: relative;
+                  overflow: hidden;
+                  page-break-after: always;
+                  break-after: page;
+                  background: white;
+                }
+                .print-label:last-child {
+                  page-break-after: auto;
+                  break-after: auto;
+                }
+                .print-small-index,
+                .print-zone,
+                .print-location,
+                .print-barcode {
+                  position: absolute;
+                }
+                .print-small-index {
+                  left: 4%;
+                  top: 36%;
+                  font-size: 2.8mm;
+                  font-weight: 400;
+                  line-height: 1;
+                  transform: translateY(-50%);
+                }
+                .print-zone {
+                  left: 12%;
+                  top: 28%;
+                  font-size: 10mm;
+                  font-weight: 400;
+                  line-height: 1;
+                  white-space: nowrap;
+                  transform: translateY(-50%);
+                }
+                .print-barcode {
+                  left: 46%;
+                  top: 8%;
+                  width: 43%;
+                  height: 20%;
+                }
+                .print-barcode svg {
+                  width: 100%;
+                  height: 100%;
+                }
+                .print-location {
+                  left: 67%;
+                  top: 83%;
+                  font-size: 21.6mm;
+                  font-weight: 700;
+                  line-height: 1;
+                  white-space: nowrap;
+                  transform: translate(-50%, -100%);
+                }
+              </style>
+            </head>
+            <body>${entries.map(printableLabelMarkup).join("")}</body>
+          </html>
+        `);
+        printWindow.document.close();
+        printWindow.focus();
+        setTimeout(() => printWindow.print(), 250);
+      }
+
       renderChoiceButtons(zones, "zoneGrid", "zone-button", (zone) => (state.zone = zone));
       renderChoiceButtons(allees, "alleeGrid", "allee-button", (allee) => (state.allee = allee));
       renderChoiceButtons(echelles, "echelleGrid", "echelle-button", (echelle) => (state.echelle = echelle));
       renderKeypad();
       update();
+      renderPrintQueue();
 
       $("resetButton").addEventListener("click", () => {
         state.zone = null;
@@ -684,22 +954,21 @@
         $("statusLine").textContent = "Formulaire réinitialisé.";
       });
 
-      $("requestButton").addEventListener("click", () => {
-        const code = barcodeValue();
-        const formatted = formatEmplacement(state.emplacement);
-        if (!code || !formatted) return;
-        const entry = {
-          id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}`,
-          action: "Demande d’impression",
-          zone: state.zone,
-          allee: state.allee,
-          echelle: formatEchelle(state.echelle),
-          emplacement: formatted,
-          barcodeValue: code,
-          createdAt: new Date().toISOString(),
-        };
+      $("addPrintButton").addEventListener("click", () => {
+        const entry = currentEntry();
+        if (!entry) return;
+        savePrintQueue([...printQueue(), entry]);
         saveHistory([entry, ...history()]);
-        $("statusLine").textContent = `Demande d’impression enregistrée pour ${code}.`;
+        renderPrintQueue();
+        $("statusLine").textContent = `Étiquette ${entry.barcodeValue} ajoutée à la liste d’impression.`;
+      });
+
+      $("printQueueButton").addEventListener("click", printQueuedLabels);
+
+      $("clearQueueButton").addEventListener("click", () => {
+        savePrintQueue([]);
+        renderPrintQueue();
+        $("statusLine").textContent = "Liste d’impression vidée.";
       });
 
       $("historyButton").addEventListener("click", () => {
@@ -711,6 +980,7 @@
         saveHistory([]);
         renderHistory();
       });
+      $("exportHistory").addEventListener("click", downloadRequestsText);
     </script>
   </body>
 </html>

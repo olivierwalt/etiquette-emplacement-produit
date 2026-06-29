@@ -26,10 +26,12 @@ L'utilisateur sélectionne :
 Puis l'application affiche une étiquette blanche au ratio `80mm x 40mm`, génère un code-barres Code 128 et propose :
 
 - `Réinitialiser`
-- `Demande d'impression`
+- `Ajouter à l'impression`
+- `Imprimer la liste`
+- `Vider la liste`
 - `Historique`
 
-La version actuelle est pensée pour fonctionner comme une simple page web sur un PC sans autorisations particulières. Elle ne tente pas d'imprimer directement et ne dépend d'aucun endpoint backend. Les demandes d'impression sont enregistrées dans l'historique local du navigateur via `localStorage`.
+La version actuelle est pensée pour fonctionner comme une simple page web sur un PC sans autorisations particulières. Elle ne dépend d'aucun endpoint backend. Les étiquettes ajoutées à l'impression sont stockées dans une file locale du navigateur via `localStorage`, puis imprimées ensemble au format `80mm x 40mm`.
 
 Une version autonome hors ligne est disponible avec :
 
@@ -169,6 +171,29 @@ vendor/JsBarcode.all.min.js
 ```
 
 Puis ouvrir `etiquette-simple.html` dans Chrome, Edge, Firefox ou un autre navigateur moderne.
+
+Flux d'utilisation :
+
+1. Renseigner zone, allée, échelle et emplacement.
+2. Vérifier l'aperçu de l'étiquette.
+3. Cliquer sur `Ajouter à l'impression`.
+4. Répéter pour toutes les étiquettes voulues.
+5. Cliquer sur `Imprimer la liste`.
+
+L'impression ouvre la boîte d'impression du navigateur avec une page par étiquette. Le CSS d'impression demande :
+
+```css
+@page {
+  size: 80mm 40mm;
+  margin: 0;
+}
+```
+
+Selon le navigateur, le pilote et l'imprimante, il peut être nécessaire de confirmer manuellement dans la boîte d'impression :
+
+- format papier : `80mm x 40mm`
+- marges : aucune ou minimum
+- échelle : 100 %
 
 L'app locale sera accessible via l'URL affichée par Vite, généralement :
 
